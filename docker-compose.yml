@@ -12,11 +12,6 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -25,11 +20,6 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   auth-service:
     build:
@@ -42,14 +32,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db
       JWT_SECRET_KEY: docker-dev-secret
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - postgres
+
 
   notification-service:
     build:
@@ -60,14 +44,8 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/notification_db
     depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - postgres
+
 
   scraping-processor:
     build:
@@ -80,16 +58,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/scraping_db
       REDIS_URL: redis://redis:6379/0
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - postgres
+      - redis
 
   webscraping-manager:
     build:
@@ -110,21 +80,11 @@ services:
       REDIS_URL: redis://redis:6379/0
     command: bash -c "bundle install && bin/rails db:prepare && bin/dev"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-      notification-service:
-        condition: service_healthy
+      - postgres
+      - redis
+      - auth-service
+      - notification-service
     tty: true
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
 
 volumes:
   postgres_data:
