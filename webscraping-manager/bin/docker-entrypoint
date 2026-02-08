@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+# opcional: migrate
+bundle exec rails db:migrate || true
+
+exec "$@"
