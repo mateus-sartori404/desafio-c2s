@@ -61,7 +61,7 @@ Sistema de web scraping de anúncios de veículos da Webmotors, construído com 
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/desafio-c2s.git
+git clone https://github.com/mateus-sartori404/desafio-c2s.git
 cd desafio-c2s
 
 # Subir todos os serviços
@@ -215,24 +215,6 @@ O sistema emite 3 tipos de eventos via WebSocket:
 
 ---
 
-## 🧪 Executando Testes
-
-```bash
-# Auth Service
-docker-compose exec auth-service bundle exec rspec
-
-# Webscraping Manager
-docker-compose exec webscraping-manager bundle exec rspec
-
-# Notification Service
-docker-compose exec notification-service bundle exec rspec
-
-# Scraping Processor
-docker-compose exec scraping-processor bundle exec rspec
-```
-
----
-
 ## 📁 Estrutura de Pastas
 
 ```
@@ -297,11 +279,5 @@ desafio-c2s/
 ## 👤 Autor
 
 **Seu Nome**
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- Email: seu-email@email.com
-
----
-
-## 📝 Licença
-
-Este projeto foi desenvolvido como parte de um processo seletivo.
+- GitHub: [@mateus-sartori404](https://github.com/mateus-sartori404)
+- Email: mateus-sartori404@gmail.com
