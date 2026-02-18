@@ -1,0 +1,38 @@
+#!/bin/bash
+set -e
+
+echo "🔄 Aguardando PostgreSQL e Redis..."
+
+# Espera o PostgreSQL estar pronto
+until pg_isready -h postgres -p 5432 -U postgres > /dev/null 2>&1; do
+  echo "⏳ PostgreSQL não está pronto ainda - aguardando..."
+  sleep 2
+done
+
+echo "✅ PostgreSQL está pronto!"
+
+# Espera o Redis estar pronto
+until redis-cli -h redis ping > /dev/null 2>&1; do
+  echo "⏳ Redis não está pronto ainda - aguardando..."
+  sleep 2
+done
+
+echo "✅ Redis está pronto!"
+
+# Remove pid antigo se existir
+rm -rf tmp/pids/server.pid
+
+# Instala dependências
+echo "📦 Instalando dependências..."
+bundle install --quiet
+
+# Cria o banco se não existir e executa migrations
+echo "🗄️ Configurando banco de dados..."
+bundle exec rails db:prepare
+
+# Inicia Sidekiq em background
+echo "⚙️ Iniciando Sidekiq..."
+bundle exec sidekiq &
+
+echo "🚀 Iniciando servidor Rails..."
+exec "$@"

@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+echo "🔄 Aguardando PostgreSQL..."
+
+# Espera o PostgreSQL estar pronto
+until pg_isready -h postgres -p 5432 -U postgres > /dev/null 2>&1; do
+  echo "⏳ PostgreSQL não está pronto ainda - aguardando..."
+  sleep 2
+done
+
+echo "✅ PostgreSQL está pronto!"
+
+# Remove pid antigo se existir
+rm -rf tmp/pids/server.pid
+
+# Instala dependências
+echo "📦 Instalando dependências..."
+bundle install --quiet
+
+# Cria o banco se não existir e executa migrations
+echo "🗄️ Configurando banco de dados..."
+bundle exec rails db:prepare
+
+echo "🚀 Iniciando servidor Rails..."
+exec "$@"

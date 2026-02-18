@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+echo "🔄 Aguardando dependências..."
+
+# Espera o PostgreSQL estar pronto
+until pg_isready -h postgres -p 5432 -U postgres > /dev/null 2>&1; do
+  echo "⏳ PostgreSQL não está pronto ainda - aguardando..."
+  sleep 2
+done
+
+echo "✅ PostgreSQL está pronto!"
+
+# Espera o Redis estar pronto
+until redis-cli -h redis ping > /dev/null 2>&1; do
+  echo "⏳ Redis não está pronto ainda - aguardando..."
+  sleep 2
+done
+
+echo "✅ Redis está pronto!"
+
+# Espera o Auth Service estar pronto
+echo "⏳ Aguardando Auth Service..."
+until curl -sf http://auth-service:3000/up > /dev/null 2>&1; do
+  sleep 3
+done
+echo "✅ Auth Service está pronto!"
+
+# Remove pid antigo se existir
+rm -rf tmp/pids/server.pid
+
+# Instala dependências
+echo "📦 Instalando dependências..."
+bundle install --quiet
+
+# Cria o banco se não existir e executa migrations
+echo "🗄️ Configurando banco de dados..."
+bundle exec rails db:prepare
+
+echo "🚀 Iniciando Vite + Rails..."
+exec "$@"
